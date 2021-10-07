@@ -1,0 +1,33 @@
+version: "3.5"
+
+networks:
+  mariadb:
+    external: true
+
+x-common: &common
+  logging:
+    driver: "json-file"
+    options:
+      max-size: 32m
+      max-file: "3"
+  restart: unless-stopped
+
+services:
+  radius:
+    <<: *common
+    build: ./build
+    container_name: ${CLIENTNAME}-${SITENAME}-server
+    ports:
+      - "1812:1812/udp"
+      - "1813:1813/udp"
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - ${DATA_FOLDER}/logs:/var/log/freeradius
+    environment:
+      - DB_NAME=${MYSQL_DATABASE}
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${MYSQL_USER}
+      - DB_PASS=${MYSQL_PASSWORD}
+    command: -X
+    networks:
+      - mariadb

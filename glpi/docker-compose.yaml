@@ -1,0 +1,54 @@
+version: '3.5'
+
+networks:
+  proxy:
+    external: true
+  internal:
+  mariadb:
+    external: true
+
+x-common: &common
+  logging:
+    driver: "json-file"
+    options:
+      max-size: 32m
+      max-file: "3"
+  restart: unless-stopped
+
+services:
+  nginx:
+    <<: *common
+    image: nginx:${NGINX_VERSION:-stable}
+    container_name: ${CLIENTNAME}-${SITENAME}-nginx
+    volumes:
+      - ${DATA_FOLDER}:${WEBROOT_FOLDER:-/var/www/html}
+      - ./conf.d/nginx:/etc/nginx/conf.d
+    links:
+      - php
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${PROXY_NETWORK}
+
+      - traefik.http.routers.${CLIENTNAME}-${SITENAME}-secured.entrypoints=${HTTPS_ENTRYPOINT}
+      - traefik.http.routers.${CLIENTNAME}-${SITENAME}-secured.rule=Host(${HOSTNAME_GLPI})
+      - traefik.http.routers.${CLIENTNAME}-${SITENAME}-secured.tls=true
+
+      - traefik.http.services.${CLIENTNAME}-${SITENAME}.loadbalancer.server.port=80
+    depends_on:
+      - php
+    networks:
+      - ${PROXY_NETWORK}
+      - internal
+
+  php:
+    <<: *common
+    build: .
+    container_name: ${CLIENTNAME}-${SITENAME}-php
+    volumes:
+      - ${DATA_FOLDER}:${WEBROOT_FOLDER:-/var/www/html}
+      - ./conf.d/php-overrides.ini:/etc/php/7.4/fpm/conf.d/99-overrides.ini
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - internal
+      - mariadb

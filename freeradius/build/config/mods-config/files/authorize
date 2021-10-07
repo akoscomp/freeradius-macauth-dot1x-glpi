@@ -1,0 +1,8 @@
+bob	Cleartext-Password := "hello"
+  Reply-Message := "Hello, %{User-Name}"
+
+aa:bb:cc:dd:ee:ff	Cleartext-Password := "aa:bb:cc:dd:ee:ff"
+  Reply-Message := "Hello, %{User-Name}",
+  Tunnel-Type = "VLAN",
+  Tunnel-Private-Group-Id = "3415",
+  Tunnel-Medium-Type = "IEEE-802"

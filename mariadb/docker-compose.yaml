@@ -1,0 +1,51 @@
+version: "3.5"
+
+networks:
+  mariadb:
+    external: true
+  proxy:
+    external: true
+  internal:
+
+x-common: &common
+  logging:
+    driver: "json-file"
+    options:
+      max-size: 32m
+      max-file: "3"
+  restart: unless-stopped
+
+services:
+  db:
+    <<: *common
+    image: mariadb:${DB_VERSION:-latest}
+    container_name: ${CLIENTNAME}-${SITENAME}-mariadb
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - ${DATA_FOLDER}:/var/lib/mysql
+    networks:
+      - mariadb
+      - internal
+
+  adminer:
+    <<: *common
+    image: adminer
+    container_name: ${CLIENTNAME}-${SITENAME}-adminer
+    restart: always
+    environment:
+      - ADMINER_DEFAULT_SERVER=${ADMINER_DEFAULT_SERVER:-lan-db-mariadb}
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.${CLIENTNAME}-${SITENAME}-adm.loadbalancer.server.port=8080
+      - traefik.docker.network=${PROXY_NETWORK}
+      - traefik.http.routers.${CLIENTNAME}-${SITENAME}-secured-adm.entrypoints=${HTTPS_ENTRYPOINT}
+      - traefik.http.routers.${CLIENTNAME}-${SITENAME}-secured-adm.rule=Host(${HOSTNAME_ADMINER})
+      - traefik.http.routers.${CLIENTNAME}-${SITENAME}-secured-adm.tls.certresolver=${CERTRESOLVER}
+    networks:
+      - internal
+      - ${PROXY_NETWORK}

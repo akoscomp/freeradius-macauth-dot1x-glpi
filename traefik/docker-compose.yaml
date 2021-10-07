@@ -1,0 +1,74 @@
+version: "3.5"
+
+networks:
+  proxy:
+    external: true
+
+x-common: &common
+  logging:
+    driver: "json-file"
+    options:
+      max-size: 32m
+      max-file: "3"
+  restart: unless-stopped
+
+services:
+  traefik:
+    <<: *common
+    image: traefik:${TRAEFIK_VERSION}
+    container_name: ${CLIENTNAME}-traefik
+    command:
+      - --api=true
+      - --log.level=INFO
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=${PROXY_NETWORK}
+      - --entrypoints.${HTTP_ENTRYPOINT}.address=:80
+      - --entrypoints.${HTTPS_ENTRYPOINT}.address=:443
+      - --certificatesresolvers.${CERTRESOLVER}.acme.email=${ACME_EMAIL}
+      - --certificatesresolvers.${CERTRESOLVER}.acme.storage=/acme.json
+      - --certificatesresolvers.${CERTRESOLVER}.acme.tlschallenge=true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${DATA_FOLDER}/acme.json:/acme.json
+    labels:
+      # Dashboard
+      - traefik.enable=true
+      - traefik.http.routers.dashboard-${CLIENTNAME}-${SITENAME}.rule=Host(${HOSTNAME_TRAEFIK})
+      - traefik.http.routers.dashboard-${CLIENTNAME}-${SITENAME}.service=api@internal
+      - traefik.http.routers.dashboard-${CLIENTNAME}-${SITENAME}.tls.certresolver=${CERTRESOLVER}
+      - traefik.http.routers.dashboard-${CLIENTNAME}-${SITENAME}.entrypoints=${HTTPS_ENTRYPOINT}
+
+      # global redirect to https
+      - traefik.http.routers.${CLIENTNAME}-${SITENAME}-http-catchall.rule=hostregexp(`{host:.+}`)
+      - traefik.http.routers.${CLIENTNAME}-${SITENAME}-http-catchall.entrypoints=${HTTP_ENTRYPOINT}
+      - traefik.http.routers.${CLIENTNAME}-${SITENAME}-http-catchall.middlewares=${CLIENTNAME}-redirect-to-https
+
+      # middleware redirect
+      - traefik.http.middlewares.${CLIENTNAME}-redirect-to-https.redirectscheme.scheme=https
+
+    networks:
+      - ${PROXY_NETWORK}
+
+  dozzle:
+    <<: *common
+    image: "amir20/dozzle:latest"
+    container_name: ${CLIENTNAME}-dozzle
+    environment:
+      DOZZLE_TAILSIZE: "6000"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${PROXY_NETWORK}
+
+      - traefik.http.routers.${CLIENTNAME}-${SITENAME}-secured-dz.entrypoints=${HTTPS_ENTRYPOINT}
+      - traefik.http.routers.${CLIENTNAME}-${SITENAME}-secured-dz.rule=Host(${HOSTNAME_DOZZLE})
+      - traefik.http.routers.${CLIENTNAME}-${SITENAME}-secured-dz.tls.certresolver=${CERTRESOLVER}
+
+      - traefik.http.services.${CLIENTNAME}-${SITENAME}-dz.loadbalancer.server.port=8080
+    networks:
+      - ${PROXY_NETWORK}
