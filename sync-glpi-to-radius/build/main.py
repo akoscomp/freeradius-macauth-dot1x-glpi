@@ -1,9 +1,12 @@
 import time
+from datetime import datetime
 
 from config import *
 from functions import *
 
-print("Hello, I'm GLPI and Radius DB sync!")
+now = datetime.now()
+
+print(now, " - Hello, I'm GLPI and Radius DB sync!")
 
 # Copy data
 for (computer_name, mac_address, networkports_id) in select_glpi_mac_computername():
