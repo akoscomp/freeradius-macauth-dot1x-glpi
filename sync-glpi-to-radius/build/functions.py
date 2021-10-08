@@ -25,6 +25,7 @@ def check_radius_db_mac_exist(radius_table, mac_address):
     connection.close()
     return results[0][0]
 
+# Check if network port has vlan assigned
 def check_glpi_networkport_has_vlan(networkports_id, mac_address):
     query = """
     SELECT
@@ -72,6 +73,8 @@ def select_glpi_mac_computername():
         FROM glpi_computers
         JOIN glpi_networkports
           ON glpi_computers.id = glpi_networkports.items_id
+        WHERE
+          glpi_networkports.mac != ""
     """
     db_database="glpi"
 
@@ -93,6 +96,7 @@ def select_glpi_mac_computername():
     connection.close()
     return results
 
+# Insert vlan info
 def insert_radius_radreply_message(mac_address, vlan_id):
     print("insert_radius_radreply_message")
     attribute = "Tunnel-Type"

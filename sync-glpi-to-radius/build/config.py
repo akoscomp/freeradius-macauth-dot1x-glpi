@@ -1,10 +1,10 @@
 db_user="root"
-db_pass="sVmWfe9ugUsAYHWKbnyu6c8m"
+db_pass="sVmWfe9ugUsAYHWKbnyu6c8m" # mysql root password from mariadb/.env
 db_host="lan-db-mariadb"
 db_port=3306
 
 
-# Define queries
+# Define queries, can delete it, is only for test
 select_mac_cname_vlan_query = """
 SELECT
   glpi_computers.name,
