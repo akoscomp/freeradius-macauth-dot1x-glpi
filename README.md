@@ -40,3 +40,4 @@ GLPI configuration parameters is in `mariadb/.env` file
  - freeradius/build/setup.sql - same with MYSQL_RADIUS_PASSWORD
  - freeradius/build/config/mods-enabled/sql - same with MYSQL_RADIUS_PASSWORD
  - freeradius/build/config/clients.conf - change password for client connections
+ - sync-glpi-to-radius/build/config.py
