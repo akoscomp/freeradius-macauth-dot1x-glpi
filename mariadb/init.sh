@@ -8,9 +8,6 @@ MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD#*=}
 PROXY_NETWORK=$(grep PROXY_NETWORK .env | xargs)
 PROXY_NETWORK=${PROXY_NETWORK#*=}
 
-RADIUS_PASS=$(grep MYSQL_PASSWORD ../freeradius/.env | xargs)
-RADIUS_PASS=${RADIUS_PASS#*=}
-
 echo "create data folders"
 mkdir -p $DATA_FOLDER
 mkdir -p $DATA_FOLDER/traefik

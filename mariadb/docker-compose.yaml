@@ -27,7 +27,7 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     volumes:
-      - ${DATA_FOLDER}:/var/lib/mysql
+      - ${DATA_FOLDER}/mariadb:/var/lib/mysql
     networks:
       - mariadb
       - internal
@@ -36,9 +36,8 @@ services:
     <<: *common
     image: adminer
     container_name: ${CLIENTNAME}-${SITENAME}-adminer
-    restart: always
     environment:
-      - ADMINER_DEFAULT_SERVER=${ADMINER_DEFAULT_SERVER:-lan-db-mariadb}
+      - ADMINER_DEFAULT_SERVER=${ADMINER_DEFAULT_SERVER:-db}
     labels:
       - traefik.enable=true
       - traefik.http.services.${CLIENTNAME}-${SITENAME}-adm.loadbalancer.server.port=8080
@@ -48,4 +47,4 @@ services:
       - traefik.http.routers.${CLIENTNAME}-${SITENAME}-secured-adm.tls.certresolver=${CERTRESOLVER}
     networks:
       - internal
-      - ${PROXY_NETWORK}
+      - proxy

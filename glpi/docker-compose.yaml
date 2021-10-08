@@ -21,7 +21,7 @@ services:
     image: nginx:${NGINX_VERSION:-stable}
     container_name: ${CLIENTNAME}-${SITENAME}-nginx
     volumes:
-      - ${DATA_FOLDER}:${WEBROOT_FOLDER:-/var/www/html}
+      - ${DATA_FOLDER}/glpi:${WEBROOT_FOLDER:-/var/www/html}
       - ./conf.d/nginx:/etc/nginx/conf.d
     links:
       - php
@@ -45,7 +45,7 @@ services:
     build: .
     container_name: ${CLIENTNAME}-${SITENAME}-php
     volumes:
-      - ${DATA_FOLDER}:${WEBROOT_FOLDER:-/var/www/html}
+      - ${DATA_FOLDER}/glpi:${WEBROOT_FOLDER:-/var/www/html}
       - ./conf.d/php-overrides.ini:/etc/php/7.4/fpm/conf.d/99-overrides.ini
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro

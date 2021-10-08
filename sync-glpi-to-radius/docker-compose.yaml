@@ -13,16 +13,9 @@ x-common: &common
   restart: unless-stopped
 
 services:
-  radius:
+  sync:
     <<: *common
     build: ./build
-    container_name: ${CLIENTNAME}-${SITENAME}-server
-    ports:
-      - "1812:1812/udp"
-      - "1813:1813/udp"
-    volumes:
-      - /etc/timezone:/etc/timezone:ro
-      - ${DATA_FOLDER}/freeradius/logs:/var/log/freeradius
-    command: -X
+    container_name: ${CLIENTNAME}-${SITENAME}-glpi-to-radius
     networks:
       - mariadb

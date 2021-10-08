@@ -31,3 +31,9 @@ cd glpi
 docker-compose up -d
 ```
 GLPI configuration parameters is in `mariadb/.env` file
+
+## Passwords that need to be changed
+ - each_folder/.env
+ - freeradius/build/setup.sql - same with MYSQL_RADIUS_PASSWORD
+ - freeradius/build/config/mods-enabled/sql - same with MYSQL_RADIUS_PASSWORD
+ - freeradius/build/config/clients.conf - change password for client connections
