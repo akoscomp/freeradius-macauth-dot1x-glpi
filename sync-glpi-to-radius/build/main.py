@@ -9,13 +9,13 @@ now = datetime.now()
 print(now, " - Hello, I'm GLPI and Radius DB sync!")
 
 # Copy data
-for (computer_name, mac_address, networkports_id) in select_glpi_mac_computername():
+for (device_name, mac_address, networkports_id) in select_glpi_device_by_mac():
   #print(f"Check mac: {mac_address}")
 
   # Check if mac address exists in radius auth table
   if (check_radius_db_mac_exist("radcheck", mac_address) == 0):
-    if insert_radius_mac_computername(mac_address, computer_name):
-      print(f"INSERT computer {computer_name} with {mac_address} mac address")
+    if insert_radius_mac_computername(mac_address, device_name):
+      print(f"INSERT computer {device_name} with {mac_address} mac address")
 
   # Check if mac address exists in radius reply table
   if (check_radius_db_mac_exist("radreply", mac_address) == 0):

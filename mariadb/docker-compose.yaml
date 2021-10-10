@@ -48,3 +48,21 @@ services:
     networks:
       - internal
       - proxy
+
+  phpmyadmin:
+    <<: *common
+    image: phpmyadmin
+    container_name: ${CLIENTNAME}-${SITENAME}-phpmyadmin
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=${ADMINER_DEFAULT_SERVER:-db}
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.${CLIENTNAME}-${SITENAME}-pma.loadbalancer.server.port=80
+      - traefik.docker.network=${PROXY_NETWORK}
+      - traefik.http.routers.${CLIENTNAME}-${SITENAME}-secured-pma.entrypoints=${HTTPS_ENTRYPOINT}
+      - traefik.http.routers.${CLIENTNAME}-${SITENAME}-secured-pma.rule=Host(${HOSTNAME_PHPMYADMIN})
+      - traefik.http.routers.${CLIENTNAME}-${SITENAME}-secured-pma.tls.certresolver=${CERTRESOLVER}
+    networks:
+      - internal
+      - proxy

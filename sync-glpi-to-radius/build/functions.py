@@ -99,19 +99,27 @@ def check_radius_reply_vlan_id(mac_address):
     connection.close()
     return results[0][0]
 
-# Select from glpi database mac addresses and computer names
-def select_glpi_mac_computername():
+# Select from glpi database mac addresses and device name
+# Inpute: table name of the device type, device type string
+# Retrun: device name, mac address, networkports_id
+def select_glpi_device_by_mac_type(device_table, device_type):
     query = """
         SELECT
-          glpi_computers.name,
+          {device_table}.name,
           glpi_networkports.mac,
           glpi_networkports.id
-        FROM glpi_computers
+        FROM {device_table}
         JOIN glpi_networkports
-          ON glpi_computers.id = glpi_networkports.items_id
+          ON {device_table}.id = glpi_networkports.items_id
         WHERE
           glpi_networkports.mac != ""
-    """
+        AND
+          glpi_networkports.itemtype = "{device_type}"
+        AND
+          {device_table}.is_template = 0
+        AND
+          {device_table}.is_deleted = 0
+    """.format(device_table = device_table, device_type = device_type)
     db_database="glpi"
 
     try:
@@ -127,10 +135,21 @@ def select_glpi_mac_computername():
         sys.exit(1)
     cursor = connection.cursor()
     cursor.execute(query)
-    results = cursor.fetchall()
+    results = list(cursor.fetchall())
     cursor.close()
     connection.close()
     return results
+
+# Need to check itemtype and get other mac types: Monitor, Phone, Peripheral, Printer, Enclosures, PDU, NetworkEquipment
+def select_glpi_device_by_mac():
+  #Type can be: Computer, Monitor, Phone, Peripheral, Printer, NetworkEquipment
+  computer = select_glpi_device_by_mac_type("glpi_computers", "Computer")
+  monitor = select_glpi_device_by_mac_type("glpi_monitors", "Monitor")
+  phone = select_glpi_device_by_mac_type("glpi_phones", "Phone")
+  peripheral = select_glpi_device_by_mac_type("glpi_peripherals", "Peripheral")
+  printer = select_glpi_device_by_mac_type("glpi_printers", "Printer")
+  allDevies = computer + monitor + phone + peripheral + printer
+  return allDevies
 
 # Insert vlan info
 def insert_radius_radreply_message(mac_address, vlan_id):
