@@ -15,5 +15,5 @@ services:
     image: docker
     container_name: ${CLIENTNAME}-${SITENAME}-restarter
     volumes: ["/var/run/docker.sock:/var/run/docker.sock"]
-    command: ["/bin/sh", "-c", "while true; do sleep 3600; docker start lan-sync-glpi-to-radius; done"]
+    command: ["/bin/sh", "-c", "while true; do sleep ${SYNC_PERIOD}; docker start lan-sync-glpi-to-radius; done"]
     restart: unless-stopped

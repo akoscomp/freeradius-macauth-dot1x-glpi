@@ -35,6 +35,13 @@ docker-compose up -d
 ```
 GLPI configuration parameters is in `mariadb/.env` file
 
+### Start sync-glpi-to-radius
+```
+cd sync-glpi-to-radius
+docker-compose up -d
+```
+This container can sync glpi database with radius database. Can add and remove vlan tags, configured for an interface. The synchronization run periodically, configured in .env. 
+
 ## Passwords that need to be changed
  - each_folder/.env
  - freeradius/build/setup.sql - same with MYSQL_RADIUS_PASSWORD
