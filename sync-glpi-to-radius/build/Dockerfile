@@ -1,10 +1,20 @@
+# set base image
 FROM python:3
-RUN pip3 install mariadb
-WORKDIR /usr/src/app
 
-COPY *.py .
+# install cron
+RUN apt-get update && apt-get install -y cron
 
-CMD ["test.py"]
-CMD ["main.py"]
+# set the working directory in the container
+WORKDIR /code
 
-ENTRYPOINT ["python3"]
+# copy files to the working directory
+COPY . .
+
+# install requirements
+RUN pip install --no-cache-dir -r requirements.txt
+
+# run crontab
+RUN crontab crontab
+
+# start cron process
+CMD ["cron", "-f"]
